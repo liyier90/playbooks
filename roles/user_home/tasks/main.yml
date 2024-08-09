@@ -1,0 +1,9 @@
+---
+- name: "Echo $HOME"
+  ansible.builtin.raw: echo -n $HOME
+  changed_when: false
+  register: echo_home
+
+- name: "Set user_home fact"
+  ansible.builtin.set_fact:
+    user_home: "{{ echo_home.stdout }}"

@@ -1,0 +1,11 @@
+---
+- name: "Set user home directory fact"
+  hosts: local
+  connection: local
+  gather_facts: false
+  roles:
+    - user_home
+
+- name: "Configure Ubuntu 22.04"
+  hosts: local
+  connection: local
