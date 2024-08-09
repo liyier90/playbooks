@@ -1,0 +1,29 @@
+---
+- name: "Check if AWS CLI v2 is installed"
+  ansible.builtin.shell: |
+    command -v aws
+  changed_when: false
+  failed_when: false
+  register: is_installed
+
+- name: "Extract and install AWS CLI v2"
+  when: is_installed.rc != 0
+  block:
+    - name: "Install required packages"
+      ansible.builtin.package:
+        name:
+          - unzip
+        state: present
+      become: true
+
+    - name: "Extract AWS CLI v2"
+      ansible.builtin.unarchive:
+        src: "{{ ansible_env.HOME }}/Downloads/awscliv2.zip"
+        dest: /tmp
+        remote_src: true
+
+    - name: "Install AWS CLI v2"
+      ansible.builtin.command: /tmp/aws/install
+      become: true
+      changed_when: "'You can now run' in install_aws_cliv2.stdout"
+      register: install_aws_cliv2
