@@ -51,7 +51,6 @@
         state: absent
 
 - name: "Apply dotfiles"
-  # ansible.builtin.command: "chezmoi init -a -v https://github.com/liyier90/dotfiles.git"
-  ansible.builtin.command: "chezmoi init -a -v {{ dotfiles_repo_url }}"
+  ansible.builtin.command: "chezmoi init -a -v --force {{ dotfiles_repo_url }}"
   changed_when: chezmoi_init.stdout_lines | length > 0
   register: chezmoi_init
