@@ -8,7 +8,7 @@ ansible_env="${ANSIBLE_ENV:-ansible}"
 
 log_info() {
     local message=$1
-    printf 'INFO - %s - %s\n' $(date +%Y%m%d-%H%M%S) "${message}"
+    printf 'INFO - %s - %s\n' "$(date +%Y%m%d-%H%M%S)" "${message}"
 }
 
 ###################
@@ -19,9 +19,10 @@ pushd .
 
 mkdir /tmp/mybuild
 cd /tmp/mybuild
-wget "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
-chmod +x ./Miniforge3-*.sh
-./Miniforge3-*.sh -b -p "${conda_base_prefix}"
+miniforge_installer="Miniforge3-$(uname)-$(uname -m).sh"
+wget "https://github.com/conda-forge/miniforge/releases/latest/download/${miniforge_installer}"
+chmod +x "${miniforge_installer}"
+"./${miniforge_installer}" -b -p "${conda_base_prefix}"
 rm -rf /tmp/mybuild
 
 popd
@@ -32,6 +33,7 @@ log_info 'Finished Miniforge install'
 #################
 log_info 'Started Ansible install'
 
+# shellcheck source=/dev/null
 . "${conda_base_prefix}/etc/profile.d/conda.sh"
 conda env create -n "${ansible_env}" -f ansible.yml
 
