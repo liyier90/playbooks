@@ -36,5 +36,7 @@ log_info 'Started Ansible install'
 # shellcheck source=/dev/null
 . "${conda_base_prefix}/etc/profile.d/conda.sh"
 conda env create -n "${ansible_env}" -f ansible.yml
+conda activate "${ansible_env}"
+ansible-galaxy install -f -r requirements.yml
 
 log_info 'Finished Ansible install'
