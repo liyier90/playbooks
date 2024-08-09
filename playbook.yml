@@ -13,3 +13,4 @@
     - role: authorized_keys
       become: true
     - aws_cliv2
+    - dotfiles

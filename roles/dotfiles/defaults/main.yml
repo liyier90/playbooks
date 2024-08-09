@@ -1,0 +1,4 @@
+---
+dotfiles_build_dir: /tmp/mybuild
+dotfiles_chezmoi_version: "2.52.0"
+dotfiles_repo_url: https://github.com/liyier90/dotfiles.git

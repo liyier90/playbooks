@@ -1,0 +1,57 @@
+---
+- name: "Check if chezmoi is installed"
+  ansible.builtin.shell: |
+    command -v chezmoi
+  changed_when: false
+  failed_when: false
+  register: is_installed
+
+- name: "Download, extract, and install chezmoi"
+  when: is_installed.rc != 0
+  block:
+    - name: "Create build directory"
+      ansible.builtin.file:
+        path: "{{ dotfiles_build_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: "Download chezmoi"
+      ansible.builtin.get_url:
+        url: "https://github.com/twpayne/chezmoi/releases/download/v{{ dotfiles_chezmoi_version }}/chezmoi_{{ dotfiles_chezmoi_version }}_linux_amd64.tar.gz"
+        dest: "{{ dotfiles_build_dir }}/chezmoi.tar.gz"
+        mode: "0755"
+
+    - name: "Extract chezmoi"
+      ansible.builtin.unarchive:
+        src: "{{ dotfiles_build_dir }}/chezmoi.tar.gz"
+        dest: "{{ dotfiles_build_dir }}"
+        remote_src: true
+
+    - name: "Install chezmoi"
+      ansible.builtin.copy:
+        src: "{{ dotfiles_build_dir }}/chezmoi"
+        dest: /usr/bin/chezmoi
+        owner: root
+        group: root
+        mode: "0755"
+      become: true
+
+    - name: "Install chezmoi completions"
+      ansible.builtin.copy:
+        src: "{{ dotfiles_build_dir }}/completions/chezmoi-completion.bash"
+        dest: /usr/share/bash-completion/completions/chezmoi
+        owner: root
+        group: root
+        mode: "0644"
+      become: true
+
+    - name: "Clean up build directory"
+      ansible.builtin.file:
+        path: "{{ dotfiles_build_dir }}"
+        state: absent
+
+- name: "Apply dotfiles"
+  # ansible.builtin.command: "chezmoi init -a -v https://github.com/liyier90/dotfiles.git"
+  ansible.builtin.command: "chezmoi init -a -v {{ dotfiles_repo_url }}"
+  changed_when: chezmoi_init.stdout_lines | length > 0
+  register: chezmoi_init
