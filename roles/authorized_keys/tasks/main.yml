@@ -1,0 +1,28 @@
+---
+- name: "Get AuthorizedKeysFile Path"
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      sshd -T | awk -v key=authorizedkeysfile -F' ' '$1==key{print $2}'
+    executable: "/bin/bash"
+  changed_when: false
+  register: sshd
+
+- name: "Parse AuthorizedKeysFile Path"
+  ansible.builtin.set_fact:
+    auth_keys_file: "{{ sshd.stdout | replace('%%', '**') | replace('%h', ansible_env.HOME) | replace('%u', ansible_env.USER) | replace('**', '%') }}"
+
+- name: "Add public key to AuthorizedKeysFile"
+  ansible.posix.authorized_key:
+    key: "{{ lookup('ansible.builtin.file', authorized_keys_public_key_file) }}"
+    manage_dir: false
+    path: "{{ auth_keys_file }}"
+    state: present
+    user: "{{ ansible_env.USER }}"
+
+- name: "Set 0600 $USER:root to AuthorizedKeysFile"
+  ansible.builtin.file:
+    path: "{{ auth_keys_file }}"
+    owner: "{{ ansible_env.USER }}"
+    group: root
+    mode: "0600"
