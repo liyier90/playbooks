@@ -14,3 +14,4 @@
       become: true
     - aws_cliv2
     - dotfiles
+    - umask
