@@ -1,0 +1,69 @@
+---
+- name: "Install required packages ca-certificates"
+  ansible.builtin.package:
+    name:
+      - ca-certificates
+    state: present
+
+- name: "Create keyrings directory"
+  ansible.builtin.file:
+    path: "{{ docker_keyrings_dir }}"
+    mode: "0755"
+    state: directory
+
+- name: "Install armored Docker GPG key"
+  ansible.builtin.copy:
+    src: docker.asc
+    dest: "{{ docker_keyrings_dir }}/docker.asc"
+    mode: "a+r"
+
+- name: "Dearmor Docker GPG key"
+  ansible.builtin.command: >
+    gpg --yes
+        --output {{ docker_keyrings_dir }}/docker.gpg
+        --dearmor {{ docker_keyrings_dir }}/docker.asc
+  changed_when: false
+
+- name: "Set dearmored Docker GPG key file permissions"
+  ansible.builtin.file:
+    path: "{{ docker_keyrings_dir }}/docker.gpg"
+    mode: "a+r"
+
+- name: "Set architecture fact"
+  ansible.builtin.set_fact:
+    arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
+
+- name: "Add Docker repository to Apt sources"
+  ansible.builtin.apt_repository:
+    repo: >
+      deb
+      [arch={{ arch }} signed-by={{ docker_keyrings_dir }}/docker.gpg]
+      {{ docker_repo_url }}
+      {{ ansible_distribution_release }}
+      stable
+    state: present
+    filename: docker
+
+- name: "Install docker-ce"
+  ansible.builtin.apt:
+    name: docker-ce
+    state: latest # noqa package-latest
+    update_cache: true
+
+- name: "Add user to docker group for non-privileged users to run docker"
+  ansible.builtin.user:
+    name: "{{ ansible_env.USER }}"
+    groups: docker
+    append: true
+
+- name: "Enable and (re)start docker"
+  ansible.builtin.systemd_service:
+    name: docker.service
+    enabled: true
+    state: restarted
+
+- name: "Enable and (re)start containerd"
+  ansible.builtin.systemd_service:
+    name: containerd.service
+    enabled: true
+    state: restarted

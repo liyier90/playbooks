@@ -15,3 +15,7 @@
     - aws_cliv2
     - dotfiles
     - umask
+    - role: docker
+      become: true
+      vars:
+        docker_repo_url: https://download.docker.com/linux/ubuntu
