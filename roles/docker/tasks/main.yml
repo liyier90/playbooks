@@ -27,7 +27,7 @@
 - name: "Set dearmored Docker GPG key file permissions"
   ansible.builtin.file:
     path: "{{ docker_keyrings_dir }}/docker.gpg"
-    mode: "a+r"
+    mode: "0644"
 
 - name: "Set architecture fact"
   ansible.builtin.set_fact:
