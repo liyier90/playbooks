@@ -1,0 +1,4 @@
+---
+node_nvm_dir: "{{ ansible_env.HOME }}/.nvm"
+node_nvm_nodejs_org_mirror: https://nodejs.org/dist
+node_nvm_version: "v0.40.0"

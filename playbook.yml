@@ -19,3 +19,6 @@
       become: true
       vars:
         docker_repo_url: https://download.docker.com/linux/ubuntu
+    - role: node
+      vars:
+        node_nvm_nodejs_org_mirror: https://nodejs.org/dist
