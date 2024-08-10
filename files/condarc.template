@@ -1,0 +1,5 @@
+channel_alias: $CONDA_CHANNEL_URL
+channels:
+  - $CONDA_CHANNEL_URL
+default_channels:
+  - $CONDA_CHANNEL_URL

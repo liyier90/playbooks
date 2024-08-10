@@ -13,7 +13,10 @@
     - role: authorized_keys
       become: true
     - aws_cliv2
-    - dotfiles
+    - role: dotfiles
+      vars:
+        dotfiles_conda_channel_url: https://conda.anaconda.org/conda-forge
+        dotfiles_pip_index_url: https://pypi.org/simple
     - umask
     - role: docker
       become: true

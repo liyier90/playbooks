@@ -28,6 +28,20 @@ rm -rf /tmp/mybuild
 popd
 log_info 'Finished Miniforge install'
 
+##########################
+# Configure Python Mirrors
+##########################
+log_info 'Started configuring Python Mirrors'
+log_info "Set conda channel URL=${CONDA_CHANNEL_URL}"
+log_info "Set pip index URL=${PIP_INDEX_URL}"
+
+envsubst < files/condarc.template >> ~/.condarc
+
+[[ -d ~/.pip ]] || mkdir -p ~/.pip
+envsubst < files/pipconf.template >> ~/.pip/pip.conf
+
+log_info 'Finished configuring Python Mirrors'
+
 #################
 # Install Ansible
 #################
