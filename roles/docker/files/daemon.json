@@ -1,0 +1,10 @@
+{
+    "bip": "100.64.0.1/10",
+    "data-root": "/data/docker",
+    "default-address-pools": [
+        {
+            "base": "100.65.0.0/16",
+            "size": 24
+        }
+    ]
+}

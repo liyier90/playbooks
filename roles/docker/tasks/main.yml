@@ -50,6 +50,14 @@
     state: latest # noqa package-latest
     update_cache: true
 
+- name: "Configure Docker daemon"
+  ansible.builtin.copy:
+    src: daemon.json
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: "Add user to docker group for non-privileged users to run docker"
   ansible.builtin.user:
     name: "{{ ansible_env.USER }}"
