@@ -23,7 +23,7 @@ miniforge_installer="Miniforge3-$(uname)-$(uname -m).sh"
 wget "https://github.com/conda-forge/miniforge/releases/latest/download/${miniforge_installer}"
 chmod +x "${miniforge_installer}"
 "./${miniforge_installer}" -b -p "${conda_base_prefix}"
-[[ -f "{conda_base_prefix}/.condarc" ]] && rm "${conda_base_prefix}/.condarc"
+[[ -f "${conda_base_prefix}/.condarc" ]] && rm "${conda_base_prefix}/.condarc"
 rm -rf /tmp/mybuild
 
 popd
