@@ -7,6 +7,9 @@ pyenv_installer_url='https://github.com/pyenv/pyenv-installer/raw/master/bin/pye
 pyenv_mpdecimal_url='https://www.bytereef.org/software/mpdecimal/releases/mpdecimal-4.0.1.tar.gz'
 pyenv_python_version='3.11'
 
+uv_version='0.8.13'
+uv_installer_url="https://github.com/astral-sh/uv/releases/download/${uv_version}/uv-installer.sh"
+
 # conda_base_prefix="${CONDA_BASE_PREFIX:-${HOME}/conda}"
 # ansible_env="${ANSIBLE_ENV:-ansible}"
 
@@ -102,9 +105,29 @@ log_info '    END mpdecimal install'
 
 log_info '  END Dependencies install'
 
+export MAKE_OPTS='-j'
 pyenv install "${pyenv_python_version}"
+unset MAKE_OPTS
 
 log_info 'END Python install'
+
+############
+# Install uv
+############
+log_info 'BEGIN uv install'
+
+uv_installer=$(curl -fsSL "${uv_installer_url}")
+if [[ -z "${uv_installer}" ]]; then
+    log_error 'Empty script'
+fi
+bash <<<"${uv_installer}"
+
+local_root="${HOME}/.local"
+[[ -d "${local_root}/bin" ]] && export PATH="${local_root}/bin${PATH:+:${PATH}}"
+
+log_info "$(uv --version)"
+
+log_info 'END uv install'
 
 # ##########################
 # # Configure Python Mirrors
