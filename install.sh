@@ -153,6 +153,6 @@ log_info 'END Configure Python Mirrors'
 log_info 'BEGIN Install Ansible'
 
 uv sync --frozen
-ansible-galaxy install -f -r requirements.yml
+uv run ansible-galaxy install -f -r requirements.yml
 
 log_info 'END Install Ansible'
