@@ -3,14 +3,16 @@
 set -euo pipefail
 [[ "${TRACE:-0}" == "1" ]] && set -x
 
+export PIP_INDEX_URL='https://pypi.org/simple'
+
 pyenv_installer_url='https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer'
-pyenv_mpdecimal_url='https://www.bytereef.org/software/mpdecimal/releases/mpdecimal-4.0.1.tar.gz'
+pyenv_mpdecimal_version='4.0.1'
+pyenv_mpdecimal_url="https://www.bytereef.org/software/mpdecimal/releases/mpdecimal-${pyenv_mpdecimal_version}.tar.gz"
 pyenv_python_version='3.11'
 
 uv_version='0.8.13'
 uv_installer_url="https://github.com/astral-sh/uv/releases/download/${uv_version}/uv-installer.sh"
 
-# conda_base_prefix="${CONDA_BASE_PREFIX:-${HOME}/conda}"
 # ansible_env="${ANSIBLE_ENV:-ansible}"
 
 log() {
@@ -31,7 +33,7 @@ log_info() {
 ###############
 # Install pyenv
 ###############
-log_info 'BEGIN pyenv install'
+log_info 'BEGIN Install pyenv'
 pushd .
 
 pyenv_installer=$(curl -fsSL "${pyenv_installer_url}")
@@ -48,14 +50,14 @@ eval "$(pyenv virtualenv-init -)"
 log_info "$(pyenv --version)"
 
 popd
-log_info 'END pyenv install'
+log_info 'END Install pyenv'
 
 ################
 # Install Python
 ################
-log_info 'BEGIN Python install'
+log_info "BEGIN Install Python ${pyenv_python_version}"
 
-log_info '  BEGIN Dependencies install'
+log_info '  BEGIN Install dependencies'
 
 sudo apt-get update
 sudo apt-get install -yq \
@@ -84,7 +86,7 @@ sudo apt-get install -yq \
     xvfb \
     zlib1g-dev
 
-log_info '    BEGIN mpdecimal install'
+log_info '    BEGIN Install mpdecimal'
 pushd .
 
 mkdir /tmp/mybuild
@@ -101,20 +103,20 @@ sudo make install
 rm -rf /tmp/mybuild
 
 popd
-log_info '    END mpdecimal install'
+log_info '    END Install mpdecimal'
 
-log_info '  END Dependencies install'
+log_info '  END Install dependencies'
 
 export MAKE_OPTS='-j'
 pyenv install "${pyenv_python_version}"
 unset MAKE_OPTS
 
-log_info 'END Python install'
+log_info "END Install Python ${pyenv_python_version}"
 
 ############
 # Install uv
 ############
-log_info 'BEGIN uv install'
+log_info 'BEGIN Install uv'
 
 uv_installer=$(curl -fsSL "${uv_installer_url}")
 if [[ -z "${uv_installer}" ]]; then
@@ -127,31 +129,30 @@ local_root="${HOME}/.local"
 
 log_info "$(uv --version)"
 
-log_info 'END uv install'
+log_info 'END Install uv'
 
-# ##########################
-# # Configure Python Mirrors
-# ##########################
-# log_info 'Started configuring Python Mirrors'
-# log_info "Set conda channel URL=${CONDA_CHANNEL_URL}"
-# log_info "Set pip index URL=${PIP_INDEX_URL}"
-# 
-# envsubst < files/condarc.template >> ~/.condarc
-# 
-# [[ -d ~/.pip ]] || mkdir -p ~/.pip
-# envsubst < files/pipconf.template >> ~/.pip/pip.conf
-# 
-# log_info 'Finished configuring Python Mirrors'
-# 
-# #################
-# # Install Ansible
-# #################
-# log_info 'Started Ansible install'
-# 
-# # shellcheck source=/dev/null
-# . "${conda_base_prefix}/etc/profile.d/conda.sh"
-# conda env create -n "${ansible_env}" -f ansible.yml
-# conda activate "${ansible_env}"
-# ansible-galaxy install -f -r requirements.yml
-# 
-# log_info 'Finished Ansible install'
+##########################
+# Configure Python Mirrors
+##########################
+log_info 'BEGIN Configure Python Mirrors'
+log_info "Set pip index URL=${PIP_INDEX_URL}"
+
+uv_config_dir="${HOME}/.config/uv" 
+[[ -d "${uv_config_dir}" ]] || mkdir -p "${uv_config_dir}"
+envsubst < files/uv.toml.template >> "${uv_config_dir}/uv.toml"
+
+pip_config_dir="${HOME}/.pip"
+[[ -d "${pip_config_dir}" ]] || mkdir -p "${pip_config_dir}"
+envsubst < files/pip.conf.template >> "${pip_config_dir}/pip.conf"
+
+log_info 'END Configure Python Mirrors'
+
+#################
+# Install Ansible
+#################
+log_info 'BEGIN Install Ansible'
+
+uv sync --frozen
+ansible-galaxy install -f -r requirements.yml
+
+log_info 'END Install Ansible'

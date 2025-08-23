@@ -1,0 +1,3 @@
+[[index]]
+url = "$PIP_INDEX_URL"
+default = true
