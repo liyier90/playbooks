@@ -6,16 +6,15 @@
   roles:
     - user_home
 
-- name: "Configure Ubuntu 22.04"
+- name: "Configure Ubuntu 24.04"
   hosts: local
   connection: local
   roles:
-    - role: authorized_keys
-      become: true
     - aws_cliv2
     - role: dotfiles
       vars:
-        dotfiles_conda_channel_url: https://conda.anaconda.org/conda-forge
+        dotfiles_repo_branch: master
+        dotfiles_repo_url: https://github.com/liyier90/dotfiles.git
         dotfiles_pip_index_url: https://pypi.org/simple
     - umask
     - role: docker

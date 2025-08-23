@@ -1,2 +1,2 @@
 ---
-ansible_python_interpreter: "{{ user_home }}/conda/envs/ansible/bin/python"
+ansible_python_interpreter: "{{ playbook_dir }}/.venv/bin/python"

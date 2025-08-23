@@ -28,9 +28,15 @@
       changed_when: "'You can now run' in install_aws_cliv2.stdout"
       register: install_aws_cliv2
 
-    - name: "Set AWS CLI v2 file permissions"
-      ansible.builtin.file:
-        path: /usr/local/aws-cli
-        mode: "0755"
-        state: directory
-        recurse: true
+    - name: "Try Set AWS CLI v2 file permissions"
+      block:
+        - name: "Set AWS CLI v2 file permissions"
+          ansible.builtin.file:
+            path: /usr/local/aws-cli
+            mode: "0755"
+            state: directory
+            recurse: true
+      rescue:
+        - name: "Report error"
+          ansible.builtin.debug:
+            msg: "Failed to set aws-cli permissions"
