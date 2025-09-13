@@ -24,3 +24,7 @@
     - role: node
       vars:
         node_nvm_nodejs_org_mirror: https://nodejs.org/dist
+    - role: rust
+      vars:
+        rust_rustup_url: https://sh.rustup.rs
+    - neovim
