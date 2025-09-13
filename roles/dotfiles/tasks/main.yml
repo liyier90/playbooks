@@ -51,27 +51,27 @@
         state: absent
 
 - name: "Apply dotfiles"
-  ansible.builtin.command: "chezmoi init -a -v --force {{ dotfiles_repo_url }}"
+  ansible.builtin.command: "chezmoi init --apply --verbose --force --branch {{ dotfiles_repo_branch }} {{ dotfiles_repo_url }}"
   changed_when: chezmoi_init.stdout_lines | length > 0
   register: chezmoi_init
 
-- name: "Set conda channel URL"
+- name: "Set uv pip index URL"
   ansible.builtin.shell:
     cmd: |
       set -o pipefail
-      envsubst < "{{ playbook_dir }}/files/condarc.template" >> ~/.condarc
+      [[ -d ~/.config/uv ]] || mkdir -p ~/.config/uv
+      envsubst < "{{ playbook_dir }}/files/uv.toml.template" >> ~/.config/uv/uv.toml
     executable: "/bin/bash"
   environment:
-    CONDA_CHANNEL_URL: "{{ dotfiles_conda_channel_url }}"
-  changed_when: "'condarc' in chezmoi_init.stdout"
-  when: "'condarc' in chezmoi_init.stdout"
+    PIP_INDEX_URL: "{{ dotfiles_pip_index_url }}"
+  changed_when: "'uv.toml' in chezmoi_init.stdout"
 
 - name: "Set pip index URL"
   ansible.builtin.shell:
     cmd: |
       set -o pipefail
       [[ -d ~/.pip/ ]] || mkdir -p ~/.pip
-      envsubst < "{{ playbook_dir }}/files/pipconf.template" >> ~/.pip/pip.conf
+      envsubst < "{{ playbook_dir }}/files/pip.conf.template" > ~/.pip/pip.conf
     executable: "/bin/bash"
   environment:
     PIP_INDEX_URL: "{{ dotfiles_pip_index_url }}"

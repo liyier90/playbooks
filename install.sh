@@ -13,8 +13,6 @@ pyenv_python_version='3.11'
 uv_version='0.8.13'
 uv_installer_url="https://github.com/astral-sh/uv/releases/download/${uv_version}/uv-installer.sh"
 
-# ansible_env="${ANSIBLE_ENV:-ansible}"
-
 log() {
     local level="${1}"
     local message="${2}"
@@ -28,6 +26,11 @@ log_error() {
 
 log_info() {
     log 'INFO' "${1}"
+}
+
+safe_mkdir() {
+    local path="${1}"
+    [[ -d "${path}" ]] || mkdir -p "${path}"
 }
 
 ###############
@@ -93,7 +96,7 @@ mkdir /tmp/mybuild
 cd /tmp/mybuild
 
 wget "${pyenv_mpdecimal_url}"
-tar -xvf mpdecimal-*.tar.gz 
+tar -xvf mpdecimal-*.tar.gz
 cd mpdecimal-*/
 
 ./configure --prefix='/usr/local'
@@ -137,13 +140,13 @@ log_info 'END Install uv'
 log_info 'BEGIN Configure Python Mirrors'
 log_info "Set pip index URL=${PIP_INDEX_URL}"
 
-uv_config_dir="${HOME}/.config/uv" 
+uv_config_dir="${HOME}/.config/uv"
 [[ -d "${uv_config_dir}" ]] || mkdir -p "${uv_config_dir}"
-envsubst < files/uv.toml.template >> "${uv_config_dir}/uv.toml"
+envsubst < files/uv.toml.template > "${uv_config_dir}/uv.toml"
 
 pip_config_dir="${HOME}/.pip"
 [[ -d "${pip_config_dir}" ]] || mkdir -p "${pip_config_dir}"
-envsubst < files/pip.conf.template >> "${pip_config_dir}/pip.conf"
+envsubst < files/pip.conf.template > "${pip_config_dir}/pip.conf"
 
 log_info 'END Configure Python Mirrors'
 
@@ -156,3 +159,23 @@ uv sync --frozen
 uv run ansible-galaxy install -f -r requirements.yml
 
 log_info 'END Install Ansible'
+
+########################
+# Playbook prerequisites
+########################
+log_info 'BEGIN Set up playbook prerequisites'
+
+download_dir="${HOME}/Downloads"
+safe_mkdir "${download_dir}"
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "${download_dir}/awscliv2.zip"
+
+log_info 'END Set up playbook prerequisites'
+
+##############
+# Run playbook
+##############
+log_info 'BEGIN Run playbook'
+
+uv run ansible-playbook -i ./inventories playbook.yml --ask-become-pass
+
+log_info 'END Run playbook'
