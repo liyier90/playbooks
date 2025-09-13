@@ -1,0 +1,3 @@
+---
+rust_rustup_dir: "{{ ansible_env.HOME }}/.rustup"
+rust_rustup_url: "https://sh.rustup.rs"
