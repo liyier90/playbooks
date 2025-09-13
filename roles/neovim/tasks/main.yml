@@ -1,0 +1,15 @@
+---
+- name: "Check is neovim is installed"
+  ansible.builtin.shell: command -v nvim
+  register: nvim_exists
+  ignore_errors: true
+
+- name: "Install and configure neovim"
+  when: nvim_exists is failed
+  block:
+    - name: "Install neovim"
+      ansible.builtin.shell: snap install nvim --classic
+
+    - name: "Disable neovim auto-update"
+      ansible.builtin.shell: snap refresh --hold nvim
+  become: true
