@@ -28,3 +28,4 @@
       vars:
         rust_rustup_url: https://sh.rustup.rs
     - neovim
+    - user_apps

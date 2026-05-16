@@ -1,0 +1,16 @@
+---
+- name: "Install fd-find, fzf, jq, ripgrep, and xclip"
+  ansible.builtin.apt:
+    name:
+      - fd-find
+      - fzf
+      - jq
+      - ripgrep
+      - xclip
+    state: present
+  become: true
+
+- name: "Symlink fdfind -> fd"
+  ansible.builtin.shell:
+    cmd: ln -sf "$(which fdfind)" "{{ ansible_env.HOME }}/.local/bin/fd"
+    creates: "{{ ansible_env.HOME }}/.local/bin/fd"
